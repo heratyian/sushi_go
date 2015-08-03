@@ -6,10 +6,19 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXFileReference section */
+		CD5933E01B6F04C6001D2B9D /* game.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = game.py; sourceTree = "<group>"; };
+		CD5933E11B6F04CD001D2B9D /* card.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = card.py; sourceTree = "<group>"; };
+		CD5933E21B6F04D8001D2B9D /* player.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = player.py; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
 /* Begin PBXGroup section */
 		CD5933CE1B6D95A7001D2B9D = {
 			isa = PBXGroup;
 			children = (
+				CD5933E01B6F04C6001D2B9D /* game.py */,
+				CD5933E11B6F04CD001D2B9D /* card.py */,
+				CD5933E21B6F04D8001D2B9D /* player.py */,
 			);
 			sourceTree = "<group>";
 		};
