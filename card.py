@@ -81,6 +81,8 @@ class Deck(object):
         self.add_maki_roll(deck_of_cards)
         self.add_wasabi(deck_of_cards)
         self.add_nigiri(deck_of_cards)
+        self.add_pudding(deck_of_cards)
+        self.add_chopsticks(deck_of_cards)
         return deck_of_cards
     
     def add_tempura(self, deck_of_cards):
@@ -122,6 +124,16 @@ class Deck(object):
             elif index < NIGIRI_EGG_COUNT+NIGIRI_SALMON_COUNT+NIGIRI_SQUID_COUNT:
                 nigiri = Nigiri("Squid")
             deck_of_cards.append(nigiri)
+
+    def add_pudding(self, deck_of_cards):
+        for _ in range(PUDDING_COUNT):
+            pudding = Pudding()
+            deck_of_cards.append(pudding)
+    
+    def add_chopsticks(self, deck_of_cards):
+        for _ in range(CHOPSTICKS_COUNT):
+            chopsticks = Chopsticks()
+            deck_of_cards.append(chopsticks)
 
     def next_card(self):
         """Deals next card in deck
@@ -229,7 +241,14 @@ class Pudding(Card):
         return "{}".format(self.short)
 
 class Chopsticks(Card):
-    pass
+    def __init__(self):
+        self.name = "Chopsticks"
+        self.short = "CH"
+        self.count = 1
+    
+    def __str__(self):
+        return "{}".format(self.short)
+
 
 
 """ Card Functions

@@ -42,7 +42,7 @@ class Sushi_Game(Game):
                 self.swap_hands()
             else: #round over
                 update_points(self, self.players, self.round, TOTAL_ROUNDS)
-                self.display_score() # show player score
+                self.show_score() # show player score
                 if self.round < TOTAL_ROUNDS: #not final round
                     self.round += 1
                     self.deal_cards() #play again
@@ -71,8 +71,15 @@ class Sushi_Game(Game):
             self.players[0].wasabi += 1
         # move card to post_hand
         self.players[0].post_hand.append(self.players[0].pre_hand.pop(index))
-        # TODO multiple robots choose card
-        self.computer.post_hand.append(self.computer.pre_hand.pop())
+        # one robot
+        #self.computer.post_hand.append(self.computer.pre_hand.pop())
+        # multiple robots
+        index = 1
+        for player in self.players:
+            if index > len(self.players)-1:
+                break
+            self.players[index].post_hand.append(self.players[index].pre_hand.pop())
+            index += 1
         
     def swap_hands(self):
         """ Swaps pre_hands for all players in players[]
@@ -85,18 +92,22 @@ class Sushi_Game(Game):
     
     def add_players(self):
         """Adds player objects to self.players[]
-            TODO: prompt user for number of computer players
         """
         name = input("What's your name? ")
         self.player = User(name)
         self.players.append(self.player)
-        # TODO change for multiple robots
+        # one robot
+        #self.computer = Computer("name")
+        #self.players.append(self.computer)
+        
+        # multiple robots
         num_opponents = int(input("How many robots would you like to play against? [1, 2, 3, or 4] "))
         while num_opponents:
             name = input("Robot name please... ")
-            self.computer = Computer("Robot")
+            self.computer = Computer(name)
             self.players.append(self.computer)
             num_opponents -= 1
+    
     
     def deal_cards(self):
         """Deal cards to each player to begin a round
@@ -104,7 +115,19 @@ class Sushi_Game(Game):
         # if players already have cards, remove them
         if self.players[0].post_hand:
             for player in self.players:
-                player.post_hand = []
+                #don't remove pudding!
+                puddings = 0
+                for card in player.post_hand:
+                    if card.name == 'Pudding':
+                        puddings += 1
+                other_cards = True
+                while (other_cards):
+                    if len(player.post_hand) == puddings:
+                        other_cards = False
+                    for card in player.post_hand:
+                        if card.name != 'Pudding':
+                            player.post_hand.remove(card)
+            
                 player.pre_hand = []
                 player.wasabi = 0
         # deal cards to pre_hand
@@ -127,7 +150,7 @@ class Sushi_Game(Game):
         print(hand)
         print("="*20)
 
-    def display_score(self):
+    def show_score(self):
         """Show score after round of play
         """
         # show score for all players
@@ -163,7 +186,6 @@ class Sushi_Game(Game):
         """
         self.setup()
         self.play()
-
 
 Sushi_Game()
 
