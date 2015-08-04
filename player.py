@@ -11,12 +11,11 @@ class Player(object):
     name = None
     points = None
     total_points = None
+    wasabi = None
+    count_dict = None
 
     def hit(self, card):
         self.pre_hand.append(card)
-    
-    def choose_card(self, card_name):
-        self.post_hand.append(self.pre_hand.pop())
 
     def __str__(self):
         return "{}".format(self.name)
@@ -29,6 +28,7 @@ class User(Player):
         self.name = name
         self.points = 0
         self.total_points = 0
+        self.wasabi = 0
 
 
 
@@ -40,6 +40,7 @@ class Computer(Player):
         self.name = name
         self.points = 0
         self.total_points = 0
+        self.wasabi = 0
 
 
 

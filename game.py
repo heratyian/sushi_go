@@ -8,7 +8,7 @@
 import sys
 import os
 
-from card import Deck, print_key, update_points, check_choice_validity, check_hand_for_card, index_of_choice
+from card import Deck, print_key, update_points, check_choice_validity, check_hand_for_card, index_of_choice, point_tabulation, WASABI_MULTIPLIER
 from player import User, Computer
 
 """Constants
@@ -37,45 +37,46 @@ class Sushi_Game(Game):
         while True:
             self.show_hand()
             if self.players[0].pre_hand: # player has pre_hand cards
-                self.show_info()
+                print_key(self) # show useful info
                 self.choose_card()
                 self.swap_hands()
             else: #round over
-                for player in self.players: # calculate points
-                    update_points(self, player, self.round, TOTAL_ROUNDS)
-                # show point tabulation
+                update_points(self, self.players, self.round, TOTAL_ROUNDS)
+                self.display_score() # show player score
                 if self.round < TOTAL_ROUNDS: #not final round
                     self.round += 1
                     self.deal_cards() #play again
-                else: #final round
+                else: #final round, game over
+                    self.decide_winner()
                     break
     
     def choose_card(self):
         """Prompts user to choose a card from player.pre_hand
             adds chosen card to post_hand
+            if player chooses nigiri, check for wasabi
         """
         choice = input("Which plate do you want to keep? ").upper()
-        # if valid
-        if check_choice_validity(self, choice):
-            pass
-        else:
+        if check_choice_validity(self, choice) == False:
             self.choose_card()
-        # if in hand
-        if check_hand_for_card(self, self.players[0].pre_hand, choice):
-            pass
-        else:
+        if check_hand_for_card(self, self.players[0].pre_hand, choice) == False:
             self.choose_card()
-        # find index of choice
         index = index_of_choice(self, choice, self.players[0].pre_hand)
-        # add to post hand
+        # Nigiri and Wasabi
+        if choice == 'N' and self.players[0].wasabi: # player has wasabi
+            dip = input("Dip in wasabi? [Y/N] ").upper()
+            if dip == 'Y':
+                self.players[0].pre_hand[index].points *= WASABI_MULTIPLIER
+                self.players[0].wasabi -= 1
+        if choice == 'W':
+            self.players[0].wasabi += 1
+        # move card to post_hand
         self.players[0].post_hand.append(self.players[0].pre_hand.pop(index))
-        # update computer players
+        # TODO multiple robots choose card
         self.computer.post_hand.append(self.computer.pre_hand.pop())
         
     def swap_hands(self):
         """ Swaps pre_hands for all players in players[]
         """
-        #hold last players hand as temp value
         last_hand = self.players[len(self.players)-1].pre_hand
         for player in self.players:
             temp = player.pre_hand
@@ -89,15 +90,24 @@ class Sushi_Game(Game):
         name = input("What's your name? ")
         self.player = User(name)
         self.players.append(self.player)
-        self.computer = Computer("robot")
-        self.players.append(self.computer)
+        # TODO change for multiple robots
+        num_opponents = int(input("How many robots would you like to play against? [1, 2, 3, or 4] "))
+        while num_opponents:
+            name = input("Robot name please... ")
+            self.computer = Computer("Robot")
+            self.players.append(self.computer)
+            num_opponents -= 1
     
     def deal_cards(self):
+        """Deal cards to each player to begin a round
+        """
         # if players already have cards, remove them
-        if self.players[0].pre_hand:
+        if self.players[0].post_hand:
             for player in self.players:
+                player.post_hand = []
                 player.pre_hand = []
-
+                player.wasabi = 0
+        # deal cards to pre_hand
         for player in self.players:
             for _ in range(CARDS_PER_PLAYER[len(self.players)]):
                 player.hit(self.deck.next_card())
@@ -117,19 +127,34 @@ class Sushi_Game(Game):
         print(hand)
         print("="*20)
 
-    def show_info(self):
-        """Show useful information on how to play the game
-        """
-        print_key(self)
-
     def display_score(self):
         """Show score after round of play
         """
-        pass
+        # show score for all players
+        for player in self.players:
+            print("{}:Round={} Total={}".format(player.name, player.points, player.total_points))
+        input("Press Enter to continue...")
+        # show point tabulation for user? point_tabulation(self)
+
+    def decide_winner(self):
+        """Iterate through players to determine final scoring order
+            (eg 1st, 2nd, 3rd...)
+        """
+        self.clear()
+        standings = []
+        index = 0
+        for player in self.players:
+            standings.append((index, player.total_points))
+            index += 1
+        standings.sort(key=lambda tup: tup[1], reverse=True)
+        index = 1
+        for tup in standings:
+            print("{}. {} with {} points".format(index, self.players[tup[0]].name, self.players[tup[0]].total_points))
+            index += 1
 
     def clear(self):
         """Clear the screen
-            """
+        """
         os.system('cls' if os.name == 'nt' else 'clear')
 
     # initializer

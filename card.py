@@ -59,7 +59,7 @@ MOST_MAKI_POINTS = 6
 SECOND_MOST_MAKI_POINTS = 3
 MOST_PUDDING_POINTS = 6
 LEAST_PUDDING_POINTS = -6
-DUMPLINGS_POINTS = {1:1, 2:3, 3:6, 4:10, 5:15}
+DUMPLINGS_POINTS = {0:0, 1:1, 2:3, 3:6, 4:10, 5:15}
 NIGIRI_POINTS = {'Egg':1, 'Salmon':2, 'Squid':3}
 TEMPURA_POINTS = 5
 SASHIMI_POINTS = 10
@@ -209,12 +209,24 @@ class Nigiri(Card):
         self.short = "N"
         self.count = 1
         self.type = type
+        if self.type == 'Egg':
+            self.points = 1
+        elif self.type == 'Salmon':
+            self.points = 2
+        elif self.type == 'Squid':
+            self.points = 3
 
     def __str__(self):
         return "{}({})".format(self.short, self.type)
 
 class Pudding(Card):
-    pass
+    def __init__(self):
+        self.name = "Pudding"
+        self.short = "P"
+        self.count = 1
+    
+    def __str__(self):
+        return "{}".format(self.short)
 
 class Chopsticks(Card):
     pass
@@ -223,14 +235,77 @@ class Chopsticks(Card):
 """ Card Functions
 """
 
-def update_points(self, player, round, total_rounds):
+def update_points(self, players, round, total_rounds):
     """ Calculates points for a round from a hand
+        updates player.points and player.total_points
         if round == 3, pudding is counted
-        returns int
-        
-        print round points & total points
     """
-    pass
+    
+    for player in players:
+        points = 0 # points in round
+        player.count_dict = dict.fromkeys(CARD_TYPES, 0) # holds counts of each type
+        
+        # count how many of each type
+        for master in CARD_TYPES:
+            count = 0
+            for player_card in player.post_hand:
+                if player_card.name == master:
+                    if player_card.name == 'Maki Roll':
+                        player.count_dict[master] += player_card.count
+                    elif player_card.name == 'Nigiri':
+                        player.count_dict[master] += player_card.count
+                        points += player_card.points
+                    else:
+                        player.count_dict[master] += 1
+
+        # calc points using count
+        for key in player.count_dict:
+            if key == 'Tempura':
+                temp_count = player.count_dict[key]
+                while temp_count >= 2:
+                    points += TEMPURA_POINTS
+                    temp_count -= 2
+            if key == 'Sashimi':
+                temp_count = player.count_dict[key]
+                while temp_count >= 3:
+                    points += SASHIMI_POINTS
+                    temp_count -= 3
+            if key == 'Dumplings':
+                points += DUMPLINGS_POINTS[player.count_dict[key]]
+
+        player.points = points #round points
+        player.total_points += player.points
+
+    # compare players counts of maki rolls
+    maki_list = []
+    index = 0
+    for player in players:
+        maki_list.append((index, player.count_dict['Maki Roll']))
+        index += 1
+    maki_list.sort(key=lambda tup: tup[1], reverse=True)
+    if maki_list[0][1] == maki_list[1][1]: #split pot
+        players[maki_list[0][0]].points += MOST_MAKI_POINTS/2
+        players[maki_list[1][0]].points += MOST_MAKI_POINTS/2
+        players[maki_list[0][0]].total_points += MOST_MAKI_POINTS/2
+        players[maki_list[1][0]].total_points += MOST_MAKI_POINTS/2
+    else:
+        players[maki_list[0][0]].points += MOST_MAKI_POINTS
+        players[maki_list[1][0]].points += SECOND_MOST_MAKI_POINTS
+        players[maki_list[0][0]].total_points += MOST_MAKI_POINTS
+        players[maki_list[1][0]].total_points += SECOND_MOST_MAKI_POINTS
+
+    # compare players counts of pudding
+    if round == total_rounds:
+        pudding_list = []
+        index = 0
+        for player in players:
+            pudding_list.append((index, player.count_dict['Pudding']))
+            index += 1
+        maki_list.sort(key=lambda tup: tup[1], reverse=True)
+        players[pudding_list[0][0]].points += MOST_PUDDING_POINTS
+        players[pudding_list[len(pudding_list)-1][0]].points += LEAST_PUDDING_POINTS
+        players[pudding_list[0][0]].total_points += MOST_PUDDING_POINTS
+        players[pudding_list[len(pudding_list)-1][0]].total_points += LEAST_PUDDING_POINTS
 
 def point_tabulation(self, player, round):
     """ Prints out total points by card type
