@@ -3,6 +3,6 @@ SUSHI GO!
 A phython terminal game based on GameWright's popular card game.
 http://www.gamewright.com/gamewright/index.php?section=games&page=game&show=29
 
-Move to directory and enter "python3 game.py" to play
+Move to directory and run "game.py" to play
 
 
